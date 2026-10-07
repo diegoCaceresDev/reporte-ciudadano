@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export const STATUSES = ["nuevo", "verificado", "en_proceso", "derivado", "resuelto", "rechazado", "duplicado"] as const;
 export type Status = (typeof STATUSES)[number];
 
@@ -41,3 +43,13 @@ export function canTransition(from: Status, to: Status): boolean {
 export function nextStatuses(from: Status): Status[] {
   return TRANSITIONS[from];
 }
+
+/**
+ * Filtro `?status=` de la API y los tiles: un estado o "abiertos". Vacío o ausente = sin filtro.
+ * Se valida antes de llegar a Postgres, que rechaza con un error 500 un valor ajeno al enum report_status.
+ */
+export const statusFilterSchema = z.preprocess(
+  (v) => (v === null || v === "" ? undefined : v),
+  z.enum([...STATUSES, "abiertos"]).optional(),
+);
+export type StatusFilter = Status | "abiertos";

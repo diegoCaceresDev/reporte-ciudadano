@@ -5,7 +5,8 @@ import { GET } from "../src/pages/tiles/[z]/[x]/[y]";
 
 // Bytes >= 0x80: son los que se corrompían (U+FFFD) cuando el adaptador trataba el tile como texto.
 const { tile } = vi.hoisted(() => ({ tile: Buffer.from([0x1a, 0x39, 0x0a, 0x08, 0x09, 0xc6, 0x38, 0xf4, 0x28, 0x80, 0xff]) }));
-vi.mock("@rc/core/tiles", () => ({ reportTile: async () => tile }));
+const reportTile = vi.hoisted(() => vi.fn(async (..._args: unknown[]) => tile));
+vi.mock("@rc/core/tiles", () => ({ reportTile }));
 
 // El endpoint solo lee `params` y `url`.
 function tileRequest(z: number, x: number, y: number, query = ""): APIContext {
@@ -27,5 +28,24 @@ describe("tiles", () => {
     expect(res.status).toBe(200);
     const out = await convertTo({ type: "v2", response: res });
     expect(lambdaBody(out)).toEqual(tile);
+  });
+
+  it("pasa el estado válido al dominio", async () => {
+    reportTile.mockClear();
+    await GET(tileRequest(5, 10, 18, "?status=resuelto&category=bache"));
+    expect(reportTile).toHaveBeenCalledWith(5, 10, 18, { category: "bache", status: "resuelto" });
+  });
+
+  it("sin estado (o vacío) no filtra", async () => {
+    reportTile.mockClear();
+    await GET(tileRequest(5, 10, 18, "?status="));
+    expect(reportTile).toHaveBeenCalledWith(5, 10, 18, { category: undefined, status: undefined });
+  });
+
+  it("un estado inválido da 400 sin consultar la base", async () => {
+    reportTile.mockClear();
+    const res = await GET(tileRequest(5, 10, 18, "?status=foo"));
+    expect(res.status).toBe(400);
+    expect(reportTile).not.toHaveBeenCalled();
   });
 });

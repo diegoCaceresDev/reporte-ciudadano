@@ -1,6 +1,7 @@
 import { reservePhotos } from "@rc/core/photos";
 import { hit } from "@rc/core/ratelimit";
 import { createReport, createReportSchema, listReports, reportPath } from "@rc/core/reports";
+import { statusFilterSchema } from "@rc/core/status";
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { clientIp, error, handle, ipHash, json } from "../../../lib/server/http";
@@ -37,7 +38,7 @@ export const GET: APIRoute = handle(async (ctx) => {
   const rows = await listReports({
     bbox: bbox?.length === 4 && bbox.every(Number.isFinite) ? (bbox as [number, number, number, number]) : undefined,
     category: p.get("category") ?? undefined,
-    status: (p.get("status") as any) ?? undefined,
+    status: statusFilterSchema.parse(p.get("status")),
     q: p.get("q")?.slice(0, 80) ?? undefined,
     limit: Number(p.get("limit") ?? 30),
   });

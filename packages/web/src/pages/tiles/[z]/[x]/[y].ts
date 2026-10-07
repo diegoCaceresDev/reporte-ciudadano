@@ -1,3 +1,4 @@
+import { statusFilterSchema } from "@rc/core/status";
 import { reportTile } from "@rc/core/tiles";
 import type { APIRoute } from "astro";
 
@@ -5,7 +6,10 @@ import type { APIRoute } from "astro";
 export const GET: APIRoute = async (ctx) => {
   const z = Number(ctx.params.z), x = Number(ctx.params.x), y = Number(String(ctx.params.y).replace(/\.pbf$/, ""));
   const p = ctx.url.searchParams;
-  const tile = await reportTile(z, x, y, { category: p.get("category") ?? undefined, status: p.get("status") ?? undefined });
+  // El mapa pide muchos tiles seguidos: un estado inválido se rechaza acá, sin ir a la base.
+  const status = statusFilterSchema.safeParse(p.get("status"));
+  if (!status.success) return new Response("Estado inválido", { status: 400 });
+  const tile = await reportTile(z, x, y, { category: p.get("category") ?? undefined, status: status.data });
   if (tile === null) return new Response("Tile inválido", { status: 400 });
   return new Response(tile.length ? new Uint8Array(tile) : null, {
     status: tile.length ? 200 : 204,
