@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import ThemeScript from "../components/ThemeScript.astro";
 
 interface Props {
   title: string;
@@ -16,6 +17,7 @@ const { title, heading, lead } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{`${title} · Reporte Ciudadano`}</title>
+    <ThemeScript />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#0a3229" />
     <link rel="manifest" href="/manifest.webmanifest" />

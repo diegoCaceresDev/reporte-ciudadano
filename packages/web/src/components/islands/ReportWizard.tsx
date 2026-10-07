@@ -6,6 +6,7 @@ import { ApiError, api, submitReport, type Created } from "../../lib/client/api"
 import { compressImage } from "../../lib/client/image";
 import { ASU_BOUNDS, BASEMAP_STYLE, collapseAttribution } from "../../lib/client/map";
 import { queueReport } from "../../lib/client/outbox";
+import { resolvedTheme } from "../../lib/client/theme";
 import { timeAgo } from "../../lib/format";
 
 interface Category {
@@ -428,7 +429,7 @@ declare global {
 function Turnstile({ siteKey, onToken }: { siteKey: string; onToken: (t: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const render = () => window.turnstile?.render(ref.current, { sitekey: siteKey, callback: onToken, language: "es", appearance: "interaction-only" });
+    const render = () => window.turnstile?.render(ref.current, { sitekey: siteKey, callback: onToken, language: "es", appearance: "interaction-only", theme: resolvedTheme() });
     if (window.turnstile) return void render();
     const s = document.createElement("script");
     s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";

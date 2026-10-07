@@ -149,7 +149,21 @@ h1, h2, .font-display { font-family: var(--font-display); letter-spacing: -0.02e
 .prose-rc h2 { @apply mt-6 mb-2 text-lg font-bold; }
 .prose-rc ul { @apply mb-3 list-disc pl-5; }
 
-.maplibregl-popup-content { @apply rounded-xl! p-0! shadow-lg! overflow-hidden; }
+/* Al cambiar de tema, sin transiciones: si no, cada elemento con `transition` anima su color (lo pone theme.ts). */
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after { transition: none !important; }
+
+/* El mapa base conserva sus colores; los popups llevan contenido de la web y siguen el tema. */
+.maplibregl-popup-content { @apply rounded-xl! p-0! shadow-lg! overflow-hidden bg-raised! text-fg; }
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip { border-bottom-color: var(--color-raised); }
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip { border-top-color: var(--color-raised); }
+.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--color-raised); }
+.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--color-raised); }
 .maplibregl-ctrl-group { @apply rounded-xl! overflow-hidden; }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 .home-map .maplibregl-ctrl-top-right { top: 6.5rem; }

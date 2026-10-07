@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import ThemeScript from "../components/ThemeScript.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
 import { safeJson } from "../lib/format";
 import { config } from "../lib/server/config";
 
@@ -44,6 +46,7 @@ const nav = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
+    <ThemeScript />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
@@ -85,6 +88,7 @@ const nav = [
         </nav>
         <div class="ml-auto flex items-center gap-2">
           <a href="/reportar" class="btn-alert hidden py-2 text-sm md:inline-flex">+ Reportar</a>
+          <ThemeToggle />
           {user ? (
             <details class="relative">
               <summary class="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full bg-accent-soft font-bold text-accent" aria-label="Cuenta">
