@@ -70,37 +70,37 @@ const nav = [
     <slot name="head" />
   </head>
   <body class:list={[fullscreen ? "h-dvh overflow-hidden" : "min-h-dvh pb-20 md:pb-0"]}>
-    <header class="sticky top-0 z-30 border-b border-sand-200 bg-white/85 backdrop-blur">
+    <header class="sticky top-0 z-30 border-b border-line bg-surface/85 backdrop-blur">
       <div class="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-        <a href="/" class="font-display flex items-center gap-2 text-[1.05rem] font-extrabold tracking-tight text-ink">
+        <a href="/" class="font-display flex items-center gap-2 text-[1.05rem] font-extrabold tracking-tight text-fg">
           <img src="/icon.svg" alt="" width="28" height="28" />
-          <span>Reporte<span class="text-brand-600">Ciudadano</span></span>
+          <span>Reporte<span class="text-accent">Ciudadano</span></span>
         </a>
         <nav class="ml-6 hidden gap-1 md:flex" aria-label="Principal">
           {nav.filter((n) => n.key !== "reportar").map((n) => (
-            <a href={n.href} class:list={["rounded-lg px-3 py-2 text-sm font-semibold", active === n.key ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-100"]}>{n.label}</a>
+            <a href={n.href} class:list={["rounded-lg px-3 py-2 text-sm font-semibold", active === n.key ? "bg-accent-soft text-accent" : "text-fg-muted hover:bg-surface-2"]}>{n.label}</a>
           ))}
-          {user?.isStaff && <a href="/admin" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Admin</a>}
+          {user?.isStaff && <a href="/admin" class="rounded-lg px-3 py-2 text-sm font-semibold text-fg-muted hover:bg-surface-2">Admin</a>}
         </nav>
         <div class="ml-auto flex items-center gap-2">
           <a href="/reportar" class="btn-alert hidden py-2 text-sm md:inline-flex">+ Reportar</a>
           {user ? (
             <details class="relative">
-              <summary class="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full bg-brand-100 font-bold text-brand-700" aria-label="Cuenta">
+              <summary class="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full bg-accent-soft font-bold text-accent" aria-label="Cuenta">
                 {(user.name ?? user.email).charAt(0).toUpperCase()}
               </summary>
               <div class="card absolute right-0 mt-2 w-56 p-2 text-sm">
-                <p class="truncate px-2 py-1 text-slate-500">{user.email}</p>
-                <a class="block rounded-lg px-2 py-2 hover:bg-slate-50" href="/mis-reportes">Mis reportes</a>
-                <a class="block rounded-lg px-2 py-2 hover:bg-slate-50" href="/mis-reportes#ciudad">Mi ciudad</a>
-                {user.isStaff && <a class="block rounded-lg px-2 py-2 hover:bg-slate-50" href="/admin">Panel de gestión</a>}
+                <p class="truncate px-2 py-1 text-fg-subtle">{user.email}</p>
+                <a class="block rounded-lg px-2 py-2 hover:bg-surface-2" href="/mis-reportes">Mis reportes</a>
+                <a class="block rounded-lg px-2 py-2 hover:bg-surface-2" href="/mis-reportes#ciudad">Mi ciudad</a>
+                {user.isStaff && <a class="block rounded-lg px-2 py-2 hover:bg-surface-2" href="/admin">Panel de gestión</a>}
                 <form method="post" action="/auth/logout">
-                  <button type="submit" class="block w-full rounded-lg px-2 py-2 text-left text-alert-600 hover:bg-slate-50">Salir</button>
+                  <button type="submit" class="block w-full rounded-lg px-2 py-2 text-left text-alert-fg hover:bg-surface-2">Salir</button>
                 </form>
               </div>
             </details>
           ) : (
-            <a href={`/ingresar?next=${encodeURIComponent(Astro.url.pathname)}`} class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50">Ingresar</a>
+            <a href={`/ingresar?next=${encodeURIComponent(Astro.url.pathname)}`} class="rounded-lg px-3 py-2 text-sm font-semibold text-accent hover:bg-accent-soft">Ingresar</a>
           )}
         </div>
       </div>
@@ -111,10 +111,10 @@ const nav = [
     </main>
 
     {!fullscreen && (
-      <footer class="mt-12 border-t border-sand-200 bg-white">
-        <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm text-slate-600 sm:grid-cols-3">
+      <footer class="mt-12 border-t border-line bg-surface">
+        <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm text-fg-muted sm:grid-cols-3">
           <div>
-            <p class="font-display font-extrabold text-ink">Reporte Ciudadano</p>
+            <p class="font-display font-extrabold text-fg">Reporte Ciudadano</p>
             <p class="mt-1">Mapa abierto de problemas urbanos de Paraguay, hecho por y para la ciudadanía.</p>
           </div>
           <ul class="space-y-1">
@@ -128,23 +128,23 @@ const nav = [
             <li><a class="hover:underline" href="/terminos">Términos de uso</a></li>
           </ul>
         </div>
-        <p class="pb-6 text-center text-xs text-slate-400">Límites administrativos: DGEEC vía geoBoundaries (CC BY 4.0) · Mapa: OpenFreeMap, © OpenStreetMap</p>
+        <p class="pb-6 text-center text-xs text-fg-subtle">Límites administrativos: DGEEC vía geoBoundaries (CC BY 4.0) · Mapa: OpenFreeMap, © OpenStreetMap</p>
       </footer>
     )}
 
-    <nav class="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-sand-200 bg-white md:hidden" aria-label="Navegación">
+    <nav class="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface md:hidden" aria-label="Navegación">
       <ul class="grid grid-cols-5">
         {nav.map((n) => (
           <li>
             {n.key === "reportar" ? (
-              <a href={n.href} class="flex flex-col items-center py-1.5 text-[11px] font-semibold text-alert-600">
-                <span class="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-alert-500 text-white shadow-lg ring-4 ring-white">
+              <a href={n.href} class="flex flex-col items-center py-1.5 text-[11px] font-semibold text-alert-fg">
+                <span class="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-alert-500 text-white shadow-lg ring-4 ring-surface">
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={n.icon} /></svg>
                 </span>
                 {n.label}
               </a>
             ) : (
-              <a href={n.href} aria-current={active === n.key ? "page" : undefined} class:list={["flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold", active === n.key ? "text-brand-600" : "text-slate-500"]}>
+              <a href={n.href} aria-current={active === n.key ? "page" : undefined} class:list={["flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold", active === n.key ? "text-accent" : "text-fg-subtle"]}>
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={n.icon} /></svg>
                 {n.label}
               </a>
