@@ -147,7 +147,7 @@ export default function MapView({ categories, initial, home }: {
 
       {/* Panel inferior con los reportes del área visible */}
       <section
-        className={`absolute inset-x-0 bottom-0 z-20 mx-auto max-w-xl rounded-t-3xl bg-surface shadow-[0_-8px_30px_rgba(0,0,0,.12)] transition-[height] duration-300 md:bottom-4 md:right-4 md:left-auto md:mx-0 md:w-96 md:rounded-3xl ${sheet === "open" ? "h-[65%]" : "h-[7rem] md:h-[70%]"}`}
+        className={`absolute inset-x-0 bottom-0 z-20 mx-auto max-w-xl rounded-t-3xl bg-raised shadow-[0_-8px_30px_rgba(0,0,0,.12)] transition-[height] duration-300 md:bottom-4 md:right-4 md:left-auto md:mx-0 md:w-96 md:rounded-3xl ${sheet === "open" ? "h-[65%]" : "h-[7rem] md:h-[70%]"}`}
         aria-label="Reportes en esta zona"
       >
         <button className="flex w-full flex-col items-center pt-2 pb-1 md:hidden" onClick={() => setSheet(sheet === "open" ? "peek" : "open")} aria-expanded={sheet === "open"}>

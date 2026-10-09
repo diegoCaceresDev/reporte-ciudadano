@@ -107,7 +107,7 @@ export default function ReportActions(props: {
           <button onClick={() => setFlagOpen(!flagOpen)} className="text-xs text-fg-subtle underline">Denunciar este reporte</button>
         )}
         {flagOpen && (
-          <div className="card mt-2 p-2 text-left">
+          <div className="popover mt-2 p-2 text-left">
             {REASONS.map(([k, label]) => (
               <button key={k} onClick={() => flag(k)} className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-2">{label}</button>
             ))}

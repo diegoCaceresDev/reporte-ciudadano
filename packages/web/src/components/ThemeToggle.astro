@@ -11,13 +11,13 @@ const options = [
   { value: "dark", label: "Oscuro" },
 ] as const;
 ---
-<details class="theme-toggle relative">
+<details class="theme-toggle relative" data-menu>
   <summary class="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 hover:text-fg" aria-label="Tema de colores">
     {options.map((o) => (
       <svg class:list={["theme-icon h-5 w-5", `theme-icon-${o.value}`]} fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={icons[o.value]} /></svg>
     ))}
   </summary>
-  <div class="card absolute right-0 z-40 mt-2 w-40 p-1 text-sm" role="group" aria-label="Tema de colores">
+  <div class="popover absolute right-0 z-40 mt-2 w-40 p-1 text-sm" role="group" aria-label="Tema de colores">
     {options.map((o) => (
       <button type="button" data-theme-choice={o.value} aria-pressed="false"
         class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-fg-muted hover:bg-surface-2 aria-pressed:font-semibold aria-pressed:text-accent">
@@ -56,16 +56,6 @@ const options = [
       if (toggle) toggle.open = false;
     });
   }
-  // Cerrar con Escape o tocando afuera, como cualquier menú.
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && toggle?.open) {
-      toggle.open = false;
-      toggle.querySelector("summary")?.focus();
-    }
-  });
-  document.addEventListener("click", (e) => {
-    if (toggle?.open && !toggle.contains(e.target as Node)) toggle.open = false;
-  });
   // Otra pestaña cambió el tema.
   window.addEventListener("storage", (e) => {
     if (e.key !== THEME_KEY) return;

@@ -107,20 +107,24 @@
     --color-fg-muted: #b2c1bc;
     --color-fg-subtle: #8a9c96;
     --color-accent: var(--color-brand-300);
-    --color-accent-soft: color-mix(in oklab, var(--color-brand-400) 16%, var(--color-surface));
-    --color-accent-ring: color-mix(in oklab, var(--color-brand-400) 35%, var(--color-surface));
+    /*
+     * Fondos suaves: el color del aviso mezclado en oklab con surface (16 %; anillos 35 %; warning 14 % y borde
+     * 40 %). Van precalculados y no con color-mix() para que funcionen en Safari < 16.2.
+     */
+    --color-accent-soft: #1a3029;  /* brand-400 */
+    --color-accent-ring: #23473c;
     --color-alert-fg: var(--color-alert-400);
-    --color-alert-soft: color-mix(in oklab, var(--color-alert-500) 16%, var(--color-surface));
-    --color-alert-ring: color-mix(in oklab, var(--color-alert-500) 35%, var(--color-surface));
+    --color-alert-soft: #312526;   /* alert-500 */
+    --color-alert-ring: #552c35;
     --color-line: #263632;
     --color-line-strong: #364a44;
     --color-success: oklch(79.2% 0.209 151.711);
-    --color-success-soft: color-mix(in oklab, oklch(72.3% 0.219 149.579) 16%, var(--color-surface));
+    --color-success-soft: #183524; /* green-500 */
     --color-warning: oklch(87.9% 0.169 91.605);
-    --color-warning-soft: color-mix(in oklab, oklch(76.9% 0.188 70.08) 14%, var(--color-surface));
-    --color-warning-line: color-mix(in oklab, oklch(76.9% 0.188 70.08) 40%, var(--color-surface));
+    --color-warning-soft: #302d1e; /* amber-500 */
+    --color-warning-line: #694d1e;
     --color-danger: oklch(70.4% 0.191 22.216);
-    --color-danger-soft: color-mix(in oklab, oklch(63.7% 0.237 25.331) 16%, var(--color-surface));
+    --color-danger-soft: #372620;  /* red-500 */
   }
 }
 
@@ -135,6 +139,16 @@ h1, h2, .font-display { font-family: var(--font-display); letter-spacing: -0.02e
 @utility btn-alert { @apply btn bg-alert-500 text-white shadow-sm shadow-alert-700/20 hover:bg-alert-600; }
 @utility btn-ghost { @apply btn bg-surface text-fg ring-1 ring-line-strong hover:bg-surface-2; }
 @utility card { @apply rounded-2xl bg-surface ring-1 ring-line shadow-sm shadow-ink/5; }
+/* Menús desplegables: un escalón por encima de la superficie, así en oscuro se separan del header. */
+@utility popover { @apply rounded-2xl bg-raised ring-1 ring-line shadow-lg shadow-ink/10; }
+/*
+ * Fondo translúcido del header. No es bg-surface/85: sin color-mix() (Safari < 16.2) Tailwind cae al blanco
+ * fijo del tema claro; acá cae a la superficie opaca del tema que corresponda.
+ */
+@utility bg-glass {
+  background-color: var(--color-surface);
+  @supports (color: color-mix(in lab, red, red)) { background-color: color-mix(in oklab, var(--color-surface) 85%, transparent); }
+}
 @utility chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold; }
 @utility input { @apply w-full rounded-xl border border-line-strong bg-surface px-3.5 py-3 text-base text-fg outline-none transition placeholder:text-fg-subtle focus:border-brand-500 focus:ring-4 focus:ring-accent-ring aria-invalid:border-alert-500 aria-invalid:ring-alert-ring; }
 @utility label { @apply mb-1.5 block text-sm font-semibold text-fg; }
@@ -142,9 +156,18 @@ h1, h2, .font-display { font-family: var(--font-display); letter-spacing: -0.02e
  * Colores que vienen de la base (estado o categoría, los elige un admin): se pasa el color con
  * style="--tint: #hex" y se derivan fondo y texto legibles en ambos temas. Mezclar el texto al 50 % con fg
  * da ≥ 4,5 de contraste con todos los colores actuales; un color nuevo muy claro podría necesitar revisarlo.
+ * Sin color-mix() (Safari < 16.2) queda el texto en el color puro, sin fondo.
  */
-@utility tint { background-color: color-mix(in oklab, var(--tint) 12%, transparent); color: color-mix(in oklab, var(--tint) 50%, var(--color-fg)); }
-@utility tint-bg { background-color: color-mix(in oklab, var(--tint) 12%, transparent); }
+@utility tint {
+  color: var(--tint);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--tint) 12%, transparent);
+    color: color-mix(in oklab, var(--tint) 50%, var(--color-fg));
+  }
+}
+@utility tint-bg {
+  @supports (color: color-mix(in lab, red, red)) { background-color: color-mix(in oklab, var(--tint) 12%, transparent); }
+}
 .prose-rc p { @apply mb-3 leading-relaxed; }
 .prose-rc h2 { @apply mt-6 mb-2 text-lg font-bold; }
 .prose-rc ul { @apply mb-3 list-disc pl-5; }

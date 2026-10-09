@@ -74,7 +74,7 @@ const nav = [
     <slot name="head" />
   </head>
   <body class:list={[fullscreen ? "h-dvh overflow-hidden" : "min-h-dvh pb-20 md:pb-0"]}>
-    <header class="sticky top-0 z-30 border-b border-line bg-surface/85 backdrop-blur">
+    <header class="sticky top-0 z-30 border-b border-line bg-glass backdrop-blur">
       <div class="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         <a href="/" class="font-display flex items-center gap-2 text-[1.05rem] font-extrabold tracking-tight text-fg">
           <img src="/icon.svg" alt="" width="28" height="28" />
@@ -90,11 +90,11 @@ const nav = [
           <a href="/reportar" class="btn-alert hidden py-2 text-sm md:inline-flex">+ Reportar</a>
           <ThemeToggle />
           {user ? (
-            <details class="relative">
+            <details class="relative" data-menu>
               <summary class="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full bg-accent-soft font-bold text-accent" aria-label="Cuenta">
                 {(user.name ?? user.email).charAt(0).toUpperCase()}
               </summary>
-              <div class="card absolute right-0 mt-2 w-56 p-2 text-sm">
+              <div class="popover absolute right-0 z-40 mt-2 w-56 p-2 text-sm">
                 <p class="truncate px-2 py-1 text-fg-subtle">{user.email}</p>
                 <a class="block rounded-lg px-2 py-2 hover:bg-surface-2" href="/mis-reportes">Mis reportes</a>
                 <a class="block rounded-lg px-2 py-2 hover:bg-surface-2" href="/mis-reportes#ciudad">Mi ciudad</a>
@@ -164,6 +164,22 @@ const nav = [
       if ("serviceWorker" in navigator && location.hostname !== "localhost") {
         navigator.serviceWorker.register("/sw.js").catch(() => {});
       }
+      // Menús del header (<details data-menu>): uno abierto a la vez, y se cierran con Escape o tocando afuera.
+      const menus = [...document.querySelectorAll<HTMLDetailsElement>("details[data-menu]")];
+      for (const m of menus) {
+        m.addEventListener("toggle", () => {
+          if (m.open) for (const other of menus) if (other !== m) other.open = false;
+        });
+      }
+      document.addEventListener("keydown", (e) => {
+        const open = menus.find((m) => m.open);
+        if (e.key !== "Escape" || !open) return;
+        open.open = false;
+        open.querySelector("summary")?.focus();
+      });
+      document.addEventListener("click", (e) => {
+        for (const m of menus) if (m.open && !m.contains(e.target as Node)) m.open = false;
+      });
       // Reportes guardados sin conexión se envían al volver la señal.
       flushOutbox();
       window.addEventListener("online", () => flushOutbox());
