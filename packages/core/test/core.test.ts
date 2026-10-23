@@ -429,6 +429,76 @@ describe("recorridos de colectivos", () => {
   });
 });
 
+describe("paradas y lugares para buscar", () => {
+  const VMT = "https://sistemas.mopc.gov.py/prototipo_vmt/api";
+  const OVERPASS = "https://overpass-api.de/api/interpreter";
+  const ok = (data: unknown[]) => new Response(JSON.stringify({ success: true, data }));
+  const stop = (id: number, nombre: string | null, lng: number, lat = -25.3) => ({ id, id_itinerario: 1, nombre, latitud: lat, longitud: lng });
+  const snapshot = (ids: number[]) => ({ synced_at: "2026-10-19T06:00:00Z", companies: [{ code: 22, status: 200, latency_ms: 1, itineraries: ids.map((id) => ({ id_itinerario: id, vigente: true })) }] });
+  const osm = { elements: [
+    { type: "way", id: 1, center: { lat: -25.28, lon: -57.56 }, tags: { name: "Shopping del Sol", shop: "mall", alt_name: "Del Sol" } },
+    { type: "node", id: 2, lat: -25.29, lon: -57.55, tags: { name: "Banco Central del Paraguay", amenity: "bank", short_name: "BCP" } },
+    // Sin nombre o de un tipo que no se busca: no entra.
+    { type: "node", id: 3, lat: -25.29, lon: -57.55, tags: { amenity: "bank" } },
+    { type: "node", id: 4, lat: -25.29, lon: -57.55, tags: { name: "Kiosko", shop: "kiosk" } },
+  ] };
+  let routes: Record<string, () => Response>;
+  beforeAll(() => {
+    vi.stubGlobal("fetch", async (url: string) => {
+      const route = routes[url.replace(VMT, "")];
+      if (!route) throw new TypeError("fetch failed");
+      return route();
+    });
+  });
+  afterAll(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("junta las paradas del VMT y los lugares de OSM en un índice sin repetidos", async () => {
+    const { syncPlaces, listPlaces } = await import("../src/places");
+    // La ruta que se repite a lo largo de kilómetros no sirve para encontrar una parada.
+    const route = Array.from({ length: 7 }, (_, i) => stop(100 + i, "Ruta Nacional Mariscal Estigarribia", -57.5 - i * 0.01));
+    routes = {
+      "/paradas?id_itinerario=1": () => ok([stop(1, "Choferes del Chaco y Las Perlas", -57.6), stop(2, "bus_stop", -57.61), stop(3, null, -57.62), ...route]),
+      // La misma parada en otro recorrido, a 10 m.
+      "/paradas?id_itinerario=2": () => ok([stop(4, "Choferes del Chaco y Las Perlas", -57.6001), stop(1, "Choferes del Chaco y Las Perlas", -57.6)]),
+      [OVERPASS]: () => new Response(JSON.stringify(osm)),
+    };
+    // La misma parada (id 1) llega en los dos recorridos.
+    expect(await syncPlaces(snapshot([1, 2]) as never)).toEqual({ stops: 9, landmarks: 2 });
+    const file = await listPlaces();
+    expect(file.places).toEqual([
+      ["Banco Central del Paraguay", -57.55, -25.29, "bank", ["BCP"]],
+      ["Shopping del Sol", -57.56, -25.28, "mall", ["Del Sol"]],
+      ["Choferes del Chaco y Las Perlas", -57.6, -25.3, "stop"],
+    ]);
+    expect(file.version).toMatch(/^[\w-]{12}$/);
+  });
+
+  it("si una fuente falla quedan sus lugares del día anterior", async () => {
+    const { syncPlaces, listPlaces } = await import("../src/places");
+    const before = await listPlaces();
+    let tries = 0;
+    routes = { [OVERPASS]: () => (tries++, new Response("", { status: 429 })) };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(await syncPlaces(snapshot([1, 2]) as never, { retryMs: 0 })).toEqual({ stops: null, landmarks: null });
+    // Overpass se reintenta una vez.
+    expect(tries).toBe(2);
+    expect(await listPlaces()).toEqual(before);
+  });
+
+  it("sin tiempo antes del límite de la Lambda no pide a Overpass ni reintenta", async () => {
+    const { syncLandmarks } = await import("../src/places");
+    let tries = 0;
+    routes = { [OVERPASS]: () => (tries++, new Response("", { status: 429 })) };
+    await expect(syncLandmarks({ deadline: Date.now() - 1 })).rejects.toThrow(/no queda tiempo/);
+    // Falla y el reintento no entra antes del límite.
+    await expect(syncLandmarks({ retryMs: 60_000, deadline: Date.now() + 30_000 })).rejects.toThrow(/HTTP 429/);
+    expect(tries).toBe(1);
+  });
+});
+
 describe("histórico del VMT", () => {
   const VMT = "https://sistemas.mopc.gov.py/prototipo_vmt/api";
   const NOW = new Date("2026-10-11T15:00:00Z");
